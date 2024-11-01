@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporal's Arrow Test</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background-color: white;
+            border: 2px solid #333;
+        }
+
+        .arrow {
+            position: absolute;
+            font-size: 2em;
+            transform-origin: center;
+        }
+
+        #center-arrow {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #edge-arrow {
+            font-size: 2em;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        #timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="score">Punkte: <span id="score-value">0</span></div>
+        <div id="timer">Zeit: <span id="timer-value">60</span>s</div>
+        <div id="center-arrow" class="arrow">↑</div>
+        <div id="edge-arrow" class="arrow"></div>
+        <div id="controls">
+            <button onclick="startGame()">Start</button>
+            <button onclick="respondToArrow()" id="response-btn">Reagieren (Pfeil unten)</button>
+        </div>
+    </div>
+
+    <script>
+        let gameActive = false;
+        let score = 0;
+        let timeLeft = 60;
+        let currentArrowsDown = false;
+        let timer;
+
+        const arrows = ['↑', '↓', '←', '→'];
+        const positions = ['top', 'bottom', 'left', 'right'];
+
+        function startGame() {
+            if (gameActive) return;
+            
+            gameActive = true;
+            score = 0;
+            timeLeft = 60;
+            document.getElementById('score-value').textContent = score;
+            document.getElementById('timer-value').textContent = timeLeft;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer-value').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            showNewArrows();
+        }
+
+        function showNewArrows() {
+            if (!gameActive) return;
+
+            const centerArrow = arrows[Math.floor(Math.random() * arrows.length)];
+            const edgeArrow = arrows[Math.floor(Math.random() * arrows.length)];
+            const edgePosition = positions[Math.floor(Math.random() * positions.length)];
+
+            document.getElementById('center-arrow').textContent = centerArrow;
+            const edgeArrowElement = document.getElementById('edge-arrow');
+            edgeArrowElement.textContent = edgeArrow;
+
+            // Position edge arrow
+            edgeArrowElement.style.top = '';
+            edgeArrowElement.style.bottom = '';
+            edgeArrowElement.style.left = '';
+            edgeArrowElement.style.right = '';
+
+            switch(edgePosition) {
+                case 'top':
+                    edgeArrowElement.style.top = '10px';
+                    edgeArrowElement.style.left = '50%';
+                    edgeArrowElement.style.transform = 'translateX(-50%)';
+                    break;
+                case 'bottom':
+                    edgeArrowElement.style.bottom = '10px';
+                    edgeArrowElement.style.left = '50%';
+                    edgeArrowElement.style.transform = 'translateX(-50%)';
+                    break;
+                case 'left':
+                    edgeArrowElement.style.left = '10px';
+                    edgeArrowElement.style.top = '50%';
+                    edgeArrowElement.style.transform = 'translateY(-50%)';
+                    break;
+                case 'right':
+                    edgeArrowElement.style.right = '10px';
+                    edgeArrowElement.style.top = '50%';
+                    edgeArrowElement.style.transform = 'translateY(-50%)';
+                    break;
+            }
+
+            currentArrowsDown = centerArrow === '↓' || edgeArrow === '↓';
+
+            setTimeout(showNewArrows, Math.random() * 1000 + 1000); // Random interval between 1-2 seconds
+        }
+
+        function respondToArrow() {
+            if (!gameActive) return;
+
+            if (currentArrowsDown) {
+                score += 10;
+            } else {
+                score -= 5;
+            }
+            
+            document.getElementById('score-value').textContent = score;
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timer);
+            alert(`Spiel beendet! Endpunktzahl: ${score}`);
+        }
+
+        // Add keyboard support
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowDown') {
+                respondToArrow();
+            }
+        });
+    </script>
+</body>
+</html>
